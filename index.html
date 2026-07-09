@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>성교육 안전 퀴즈</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
+        :root {
+            --primary-color: #4a90e2;
+            --correct-color: #50e3c2;
+            --incorrect-color: #ff7675;
+            --light-gray: #f2f2f2;
+            --dark-gray: #555;
+            --background-color: #eef2f7;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        .quiz-wrapper {
+            width: 100%;
+            max-width: 900px;
+            background-color: white;
+            border-radius: 30px;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+        }
+
+        .progress-sidebar {
+            background-color: #3a7bc8;
+            padding: 30px 22.5px;
+            display: flex;
+            flex-direction: column-reverse;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .progress-box {
+            width: 60px;
+            height: 45px;
+            margin-bottom: 12px;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            background-color: transparent;
+            border-radius: 9px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 21px;
+            transition: all 0.4s ease;
+        }
+
+        .progress-box.correct {
+            background-color: var(--correct-color);
+            border-color: var(--correct-color);
+            transform: scale(1.1);
+        }
+
+        .main-content {
+            width: 100%;
+            padding: 45px;
+        }
+
+        #question-container h2 {
+            font-size: 1.6em;
+            color: var(--dark-gray);
+            margin-bottom: 37.5px;
+            line-height: 1.5;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 22.5px;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            background-color: #fff;
+            font-size: 1.125em;
+            font-family: 'Noto Sans KR', sans-serif;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: var(--light-gray);
+            border-color: var(--primary-color);
+        }
+        
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-btn.correct {
+            background-color: #e6fffa;
+            border-color: var(--correct-color);
+            color: #004d40;
+            font-weight: bold;
+        }
+
+        .option-btn.incorrect {
+            background-color: #ffebee;
+            border-color: var(--incorrect-color);
+            color: #c62828;
+            animation: shake 0.5s;
+        }
+
+        #short-answer-input {
+            width: 100%;
+            padding: 22.5px;
+            margin-bottom: 22.5px;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            font-size: 1.125em;
+            font-family: 'Noto Sans KR', sans-serif;
+            box-sizing: border-box;
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 22.5px;
+            border: none;
+            border-radius: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 1.25em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #submit-btn:hover {
+            background-color: #3a7bc8;
+        }
+
+        #feedback {
+            margin-top: 30px;
+            font-weight: bold;
+            font-size: 1.25em;
+            min-height: 37.5px;
+        }
+
+        .feedback-correct { color: #00897b; }
+        .feedback-incorrect { color: var(--incorrect-color); }
+
+        #results-screen {
+            text-align: center;
+        }
+
+        #results-screen h2 {
+            font-size: 2.25em;
+            color: var(--primary-color);
+        }
+        
+        .score-display {
+            font-size: 1.35em;
+            margin: 30px 0;
+        }
+
+        #result-chart-container {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            height: 330px;
+            margin: 45px auto;
+        }
+        
+        .result-bar {
+            width: 90px;
+            height: 30px;
+            margin-bottom: 3px;
+            background-color: var(--correct-color);
+            border-radius: 6px;
+            opacity: 0;
+            transform: translateX(-30px);
+            animation: slideIn 0.5s forwards;
+        }
+
+        #success-message {
+            font-size: 1.45em;
+            font-weight: bold;
+            color: var(--correct-color);
+            margin: 30px 0;
+        }
+        
+        #restart-btn {
+            padding: 18px 45px;
+            border: none;
+            border-radius: 15px;
+            background-color: var(--dark-gray);
+            color: white;
+            font-size: 1.125em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        #restart-btn:hover {
+            background-color: #333;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-7.5px); }
+            75% { transform: translateX(7.5px); }
+        }
+        
+        @keyframes slideIn {
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-wrapper">
+        <div class="progress-sidebar" id="progress-sidebar"></div>
+        <div class="main-content">
+            <div id="quiz-container">
+                <div id="question-container">
+                    <h2 id="question-text"></h2>
+                </div>
+                <div id="answer-container">
+                    <div id="options-grid" class="options-grid"></div>
+                    <textarea id="short-answer-input" placeholder="답변을 입력하세요..." style="display: none;"></textarea>
+                    <button id="submit-btn" style="display: none;">답변 제출</button>
+                </div>
+                <p id="feedback"></p>
+            </div>
+
+            <div id="results-screen" style="display: none;">
+                <h2>퀴즈 결과</h2>
+                <p class="score-display">
+                    정답: <span id="correct-count"></span>개 | 
+                    오답: <span id="incorrect-count"></span>개
+                </p>
+                <div id="result-chart-container"></div>
+                <p id="success-message" style="display: none;"></p>
+                <button id="restart-btn">다시 시작하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const quizData = [
+                // ... (1~8번 문제는 동일하게 유지)
+                { type: 'multiple-choice', question: "성적 자기 결정권이란 무엇일까요?", options: ["남이 하라는 대로 따라야 하는 것","친구가 시키는 대로 하는 것","내 몸과 성에 대해 내가 결정할 수 있는 권리","어른이 정해주는 대로만 해야 하는 것"], answer: "내 몸과 성에 대해 내가 결정할 수 있는 권리" },
+                { type: 'multiple-choice', question: "다음 중 성폭력에 해당하는 행동은 무엇인가요?", options: ["상대방의 동의 없이 몸을 만지는 행동","친구에게 인사를 하는 것","재미있는 이야기를 나누는 것","함께 운동을 하는 것"], answer: "상대방의 동의 없이 몸을 만지는 행동" },
+                { type: 'multiple-choice', question: "아래 상황에서 올바른 대처 방법은 무엇인가요?\n“아는 사람이 차로 데려다주겠다고 해요.”", options: ["고마워하며 차를 탄다","따라가도 괜찮은지 고민해 본다","혼자 탑승하지 않고 거절하거나 도움을 요청한다","이름을 알고 있으니 괜찮다 생각하고 탄다"], answer: "혼자 탑승하지 않고 거절하거나 도움을 요청한다" },
+                { type: 'multiple-choice', question: "성폭력을 당했을 때 가장 먼저 해야 할 일은 무엇인가요?", options: ["집에 가서 혼자 운다","씻고 옷을 갈아입는다","믿을 만한 어른에게 알리고 112에 신고한다","아무 일도 아닌 것처럼 행동한다"], answer: "믿을 만한 어른에게 알리고 112에 신고한다" },
+                { type: 'multiple-choice', question: "성폭력의 위험을 줄이기 위한 예방법으로 알맞은 것은?", options: ["모르는 사람이라도 친절하면 따라간다","혼자 있을 때 모르는 사람의 부탁을 거절한다","아는 사람이면 무조건 믿는다","누군가 만졌을 때 아무 말도 하지 않는다"], answer: "혼자 있을 때 모르는 사람의 부탁을 거절한다" },
+                { type: 'multiple-choice', question: "다음 중 ‘그루밍’의 설명으로 가장 알맞은 것은?", options: ["머리를 다듬는 것","친구들과 친해지는 방법","가해자가 피해자와 친밀한 관계를 맺고 성폭력을 준비하는 행동","친구에게 장난치는 행동"], answer: "가해자가 피해자와 친밀한 관계를 맺고 성폭력을 준비하는 행동" },
+                { type: 'multiple-choice', question: "성폭력 피해를 입었을 때 옷이나 소지품은 어떻게 보관해야 하나요?", options: ["바로 빨래를 한다","비닐봉투에 담아둔다","종이봉투에 담아 보관한다","그냥 바닥에 둔다"], answer: "종이봉투에 담아 보관한다" },
+                { type: 'short-answer', question: "성폭력을 당했을 때, 신고할 수 있는 전화번호를 1가지 이상 써보세요.", answer: ["112", "117", "1366"] },
+                { type: 'short-answer', question: "‘그루밍 성폭력’이란 무엇인가요? 자신의 말로 간단히 설명해 보세요.", answer: ["가해자", "친한", "친밀", "가까워", "성폭력"] },
+                { type: 'short-answer', question: "옆집 어른이 “도와달라”며 차에 물건을 옮겨 달라고 하면 어떻게 해야 하나요?", answer: ["거절", "어른", "도움", "요청", "따라가지"] }
+            ];
+
+            const progressSidebar = document.getElementById('progress-sidebar');
+            const questionText = document.getElementById('question-text');
+            const optionsGrid = document.getElementById('options-grid');
+            const shortAnswerInput = document.getElementById('short-answer-input');
+            const submitBtn = document.getElementById('submit-btn');
+            const feedback = document.getElementById('feedback');
+            const quizContainer = document.getElementById('quiz-container');
+            const resultsScreen = document.getElementById('results-screen');
+            const correctCountSpan = document.getElementById('correct-count');
+            const incorrectCountSpan = document.getElementById('incorrect-count');
+            const resultChartContainer = document.getElementById('result-chart-container');
+            const successMessage = document.getElementById('success-message');
+            const restartBtn = document.getElementById('restart-btn');
+
+            let currentQuestionIndex = 0;
+            let correctAnswers = 0;
+            let incorrectAnswers = 0;
+            let attempts = 0;
+
+            function startQuiz() {
+                currentQuestionIndex = 0;
+                correctAnswers = 0;
+                incorrectAnswers = 0;
+                resultsScreen.style.display = 'none';
+                quizContainer.style.display = 'block';
+                setupProgressSidebar();
+                loadQuestion();
+            }
+
+            function setupProgressSidebar() {
+                progressSidebar.innerHTML = '';
+                for (let i = 0; i < quizData.length; i++) {
+                    const box = document.createElement('div');
+                    box.classList.add('progress-box');
+                    box.dataset.index = i;
+                    box.textContent = i + 1;
+                    progressSidebar.appendChild(box);
+                }
+            }
+
+            function loadQuestion() {
+                attempts = 0;
+                feedback.textContent = '';
+                feedback.className = '';
+                
+                const q = quizData[currentQuestionIndex];
+                questionText.textContent = `${currentQuestionIndex + 1}. ${q.question}`;
+
+                optionsGrid.innerHTML = '';
+                shortAnswerInput.value = '';
+                enableQuestionInputs();
+
+                if (q.type === 'multiple-choice') {
+                    shortAnswerInput.style.display = 'none';
+                    submitBtn.style.display = 'none';
+                    optionsGrid.style.display = 'grid';
+
+                    q.options.forEach(option => {
+                        const button = document.createElement('button');
+                        button.textContent = option;
+                        button.classList.add('option-btn');
+                        button.addEventListener('click', () => handleAnswer(button));
+                        optionsGrid.appendChild(button);
+                    });
+                } else {
+                    optionsGrid.style.display = 'none';
+                    shortAnswerInput.style.display = 'block';
+                    submitBtn.style.display = 'block';
+                    
+                    // Enter 키로도 제출 가능하게 (편의성)
+                    shortAnswerInput.onkeydown = function(e) {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleAnswer(null);
+                        }
+                    };
+                }
+            }
+
+            function handleAnswer(selectedButton) {
+                const q = quizData[currentQuestionIndex];
+                let isCorrect = false;
+
+                if (q.type === 'multiple-choice') {
+                    isCorrect = (selectedButton.textContent === q.answer);
+                } else {
+                    const userAnswer = shortAnswerInput.value.trim();
+                    isCorrect = q.answer.some(keyword => 
+                        userAnswer.toLowerCase().includes(keyword.toLowerCase())
+                    );
+                }
+
+                if (isCorrect) {
+                    handleCorrectAnswer(selectedButton);
+                } else {
+                    handleIncorrectAnswer(selectedButton);
+                }
+            }
+
+            function handleCorrectAnswer(selectedButton) {
+                correctAnswers++;
+                feedback.textContent = "정답입니다! 🎉";
+                feedback.className = 'feedback-correct';
+
+                if (quizData[currentQuestionIndex].type === 'multiple-choice') {
+                    optionsGrid.querySelectorAll('.option-btn').forEach(btn => {
+                        if (btn.textContent === quizData[currentQuestionIndex].answer) btn.classList.add('correct');
+                        btn.disabled = true;
+                    });
+                }
+
+                document.querySelector(`.progress-box[data-index='${currentQuestionIndex}']`).classList.add('correct');
+                
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < quizData.length) loadQuestion();
+                    else showResults();
+                }, 1500);
+            }
+
+            function handleIncorrectAnswer(selectedButton) {
+                attempts++;
+
+                if (quizData[currentQuestionIndex].type === 'multiple-choice') {
+                    selectedButton.classList.add('incorrect');
+                }
+
+                if (attempts < 2) {
+                    feedback.className = 'feedback-incorrect';
+                    feedback.textContent = `아쉬워요! 다시 한번 풀어보세요. (남은 기회: 1번)`;
+                    enableQuestionInputs();
+                } else {
+                    incorrectAnswers++;
+                    feedback.className = 'feedback-incorrect';
+                    feedback.textContent = "아쉽지만 다음 문제로 넘어갑니다.";
+
+                    disableQuestionInputs();
+
+                    if (quizData[currentQuestionIndex].type === 'multiple-choice') {
+                        optionsGrid.querySelectorAll('.option-btn').forEach(btn => {
+                            if (btn.textContent === quizData[currentQuestionIndex].answer) btn.classList.add('correct');
+                            btn.disabled = true;
+                        });
+                    }
+
+                    setTimeout(() => {
+                        currentQuestionIndex++;
+                        if (currentQuestionIndex < quizData.length) loadQuestion();
+                        else showResults();
+                    }, 2000);
+                }
+            }
+
+            function disableQuestionInputs() {
+                optionsGrid.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+                shortAnswerInput.disabled = true;
+                submitBtn.disabled = true;
+            }
+
+            function enableQuestionInputs() {
+                optionsGrid.querySelectorAll('.option-btn').forEach(btn => btn.disabled = false);
+                shortAnswerInput.disabled = false;
+                submitBtn.disabled = false;
+            }
+
+            function showResults() {
+                quizContainer.style.display = 'none';
+                resultsScreen.style.display = 'block';
+                correctCountSpan.textContent = correctAnswers;
+                incorrectCountSpan.textContent = incorrectAnswers;
+
+                resultChartContainer.innerHTML = '';
+                for (let i = 0; i < correctAnswers; i++) {
+                    const bar = document.createElement('div');
+                    bar.classList.add('result-bar');
+                    bar.style.animationDelay = `${i * 0.1}s`;
+                    resultChartContainer.appendChild(bar);
+                }
+
+                if (correctAnswers === quizData.length) {
+                    successMessage.textContent = "축하합니다! 모든 문제를 완벽하게 맞혔어요! 🏆";
+                    successMessage.style.display = 'block';
+                } else {
+                    successMessage.style.display = 'none';
+                }
+            }
+
+            // 제출 버튼 이벤트
+            submitBtn.addEventListener('click', () => handleAnswer(null));
+
+            // 다시 시작
+            restartBtn.addEventListener('click', startQuiz);
+            
+            startQuiz();
+        });
+    </script>
+</body>
+</html>
